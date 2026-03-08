@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconnaissance Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Courier+Prime:wght@400;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+
+            --bg-main: #0a0a0a;
+            --bg-card: #141414;
+            --bg-element: #1f1f1f;
+            --border-color: #333333;
+            --border-hover: #666666;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --accent: #ffffff;
+
+            --sub-color: #dddddd;
+            --infra-color: #cccccc;
+            --high-sev: #ffffff;
+            --med-sev: #bbbbbb;
+            --user-info-color: #aaaaaa;
+            --search-color: #eeeeee;
+            --web-color: #dddddd;
+            --meta-color: #cccccc;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --scanline-opacity: 0.05;
+            --scanline-color: rgba(255, 255, 255, 0.05);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-main: #ffffff;
+                --bg-card: #f8f9fa;
+                --bg-element: #e9ecef;
+                --text-main: #000000;
+                --text-muted: #000000;
+                --accent: #000000;
+                --border-color: #dee2e6;
+                --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                --grid-color: #f0f0f0;
+                --scanline-opacity: 0.05;
+                --scanline-color: rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            padding-bottom: 50px;
+            background-image:
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+        }
+
+
+        .text-main {
+            color: var(--text-main) !important;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .accordion-button {
+            font-family: 'Outfit', 'Montserrat', sans-serif !important;
+            letter-spacing: 1px;
+        }
+
+        .header-section {
+            background-color: var(--bg-main);
+            padding: 30px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .title-glow {
+            font-weight: 700;
+            letter-spacing: 3px !important;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .search-container-wrapper {
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+        }
+
+        .search-container {
+            border: 1px solid var(--border-color) !important;
+            background: transparent;
+            border-radius: 8px;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--accent) !important;
+        }
+
+        .search-container input {
+            border: none !important;
+            padding: 16px 25px;
+            flex-grow: 1;
+            outline: none;
+            background: transparent;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', 'Courier Prime', monospace;
+            font-weight: 600;
+            font-size: 1.15rem;
+        }
+
+        .search-container input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .btn-execute {
+            background: var(--accent);
+            color: var(--bg-main);
+            border: none;
+            padding: 0 35px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .btn-execute:hover {
+            transform: scale(1.02);
+            background: var(--text-main);
+            color: var(--bg-main);
+        }
+
+
+        .scan-options {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-scan-option {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 10px 18px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            flex: 1 0 20%;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            cursor: pointer;
+        }
+
+        .btn-scan-option:hover {
+            background: var(--bg-element);
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-scan-option.active {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+
+        .badge-recon {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            margin-right: 15px;
+            line-height: 1;
+            background: var(--bg-main);
+        }
+
+        .type-infra {
+            color: var(--infra-color);
+            border: 1px solid var(--infra-color);
+            background: var(--bg-element);
+        }
+
+        .type-sub {
+            color: var(--sub-color);
+            border: 1px solid var(--sub-color);
+            background: var(--bg-element);
+        }
+
+        .type-user {
+            color: var(--user-info-color);
+            border: 1px solid var(--user-info-color);
+            background: var(--bg-element);
+        }
+
+        .type-search {
+            color: var(--search-color);
+            border: 1px solid var(--search-color);
+            background: var(--bg-element);
+        }
+
+        .type-web {
+            color: var(--web-color);
+            border: 1px solid var(--web-color);
+            background: var(--bg-element);
+        }
+
+        .type-meta {
+            color: var(--meta-color);
+            border: 1px solid var(--meta-color);
+            background: var(--bg-element);
+        }
+
+        .sev-high {
+            color: var(--high-sev);
+            border: 1px solid var(--high-sev);
+            background: var(--bg-element);
+        }
+
+        .sev-med {
+            color: var(--med-sev);
+            border: 1px solid var(--med-sev);
+            background: var(--bg-element);
+        }
+
+
+        .color-purple {
+            color: #9b4dff !important;
+            border: 1px solid #9b4dff !important;
+            background: var(--bg-element);
+        }
+
+        .color-red {
+            color: #ff4d4d !important;
+            border: 1px solid #ff4d4d !important;
+            background: var(--bg-element);
+        }
+
+        .color-yellow {
+            color: #ffcc00 !important;
+            border: 1px solid #ffcc00 !important;
+            background: var(--bg-element);
+        }
+
+        .color-green {
+            color: #2eb872 !important;
+            border: 1px solid #2eb872 !important;
+            background: var(--bg-element);
+        }
+
+        .color-blue {
+            color: #4da6ff !important;
+            border: 1px solid #4da6ff !important;
+            background: var(--bg-element);
+        }
+
+        .color-orange {
+            color: #ff9933 !important;
+            border: 1px solid #ff9933 !important;
+            background: var(--bg-element);
+        }
+
+        .color-grey {
+            color: #a0a0a0 !important;
+            border: 1px solid #a0a0a0 !important;
+            background: var(--bg-element);
+        }
+
+        .color-teal {
+            color: #00ccb4 !important;
+            border: 1px solid #00ccb4 !important;
+            background: var(--bg-element);
+        }
+
+        .report-view {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+
+
+        .accordion-item {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            margin-bottom: 20px;
+            border-radius: 8px !important;
+            overflow: hidden;
+        }
+
+        .accordion-item:hover {
+            border-color: var(--border-hover) !important;
+        }
+
+        .accordion-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent !important;
+            color: var(--text-main) !important;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 20px 25px;
+        }
+
+        .accordion-button:not(.collapsed) {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 240, 255, 0.03) !important;
+        }
+
+        .accordion-button span:first-child {
+            flex-grow: 1;
+        }
+
+        .accordion-body {
+            color: var(--text-main) !important;
+            padding: 25px;
+            overflow-x: auto;
+        }
+
+        .meta-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .meta-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 400;
+            font-size: 1.05rem;
+            margin-bottom: 22px;
+            color: var(--text-main) !important;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-element);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            border-color: var(--accent);
+            background-color: rgba(0, 240, 255, 0.1);
+        }
+
+        .alert {
+            background-color: var(--bg-element);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+        }
+
+        .alert-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--text-muted);
+            color: var(--text-muted);
+        }
+
+
+        #scan-status .alert-success {
+            background: rgba(46, 184, 114, 0.1) !important;
+            color: #2eb872 !important;
+            border: 1px solid #2eb872 !important;
+        }
+
+        #scan-status .alert-danger {
+            background: rgba(255, 77, 77, 0.1) !important;
+            color: #ff4d4d !important;
+            border: 1px solid #ff4d4d !important;
+        }
+
+        .btn-dork-open {
+            color: var(--accent) !important;
+            border: 1px solid var(--accent) !important;
+            background-color: transparent !important;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-dork-open:hover {
+            background-color: var(--accent) !important;
+            color: #000 !important;
+        }
+
+
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 9999;
+            background: linear-gradient(0deg, transparent 0%, var(--scanline-color) 50%, transparent 100%);
+            opacity: var(--scanline-opacity);
+            position: fixed;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+
+
+        .sidebar-sticky {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 30px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            padding-right: 20px;
+        }
+
+        .sidebar-nav-item {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 12px 18px;
+            display: block;
+            text-decoration: none;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+            transform-origin: center;
+        }
+
+        .sidebar-nav-item:hover,
+        .sidebar-nav-item.active {
+            background: rgba(0, 240, 255, 0.05);
+            color: var(--text-main);
+            padding-left: 22px;
+        }
+
+        .sidebar-nav-item:hover::before,
+        .sidebar-nav-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .sidebar-nav-item.active {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+
+        @media (max-width: 992px) {
+            .btn-scan-option {
+                flex: 1 0 30%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-section {
+                padding: 20px 0;
+            }
+
+            h4 {
+                font-size: 1.1rem;
+            }
+
+            .search-container-wrapper {
+                padding: 0 15px;
+            }
+
+            .search-container {
+                flex-direction: column;
+                background: transparent;
+                border: none !important;
+            }
+
+            .search-container input {
+                border: 1px solid var(--border-color) !important;
+                background: var(--bg-card);
+                border-radius: 8px;
+                margin-bottom: 12px;
+                width: 100%;
+            }
+
+            .btn-execute {
+                font-size: 1rem;
+                padding: 15px 0;
+                width: 100%;
+                border-radius: 8px;
+            }
+
+            .btn-scan-option {
+                flex: 1 0 45%;
+                font-size: 0.8rem;
+                padding: 10px;
+                min-height: 48px;
+            }
+
+            .sidebar-sticky {
+                position: relative;
+                top: 0;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding-right: 0;
+                padding-bottom: 15px;
+                margin-bottom: 25px;
+                display: flex;
+                flex-wrap: nowrap;
+                gap: 10px;
+                background: transparent;
+            }
+
+            .sidebar-nav-item {
+                display: inline-block;
+                white-space: nowrap;
+                margin-bottom: 0;
+                border: 1px solid var(--border-color);
+                flex: 0 0 auto;
+                padding: 10px 15px;
+            }
+
+            .sidebar-nav-item:hover,
+            .sidebar-nav-item.active {
+                padding-left: 15px;
+            }
+
+            .sidebar-nav-item::before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn-scan-option {
+                flex: 1 0 100%;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="scanline"></div>
+
+    <div class="header-section text-center">
+        <div class="container">
+            <h4 class="mb-4 title-glow">AUTOMATED RECONNAISSANCE BOT</h4>
+            <div class="search-container-wrapper">
+                <div class="input-group search-container">
+                    <input type="text" id="targetInput" placeholder="Target IP or Domain...">
+                    <select id="targetType"
+                        style="background: transparent; border: none; color: var(--text-main); font-family: 'Outfit'; font-weight: 600; outline: none; padding: 0 15px; border-left: 1px solid var(--border-color); cursor: pointer; display: none;">
+                        <option style="background: var(--bg-card); color: var(--text-main);" value="website">Web
+                            Application Scanning</option>
+                        <option style="background: var(--bg-card); color: var(--text-main);" value="network">
+                            Infrastructure Scanning</option>
+                    </select>
+                    <button class="btn-execute" onclick="startScan()" id="scanBtn">SCAN</button>
+                </div>
+                <div class="scan-options">
+                    <button class="btn btn-scan-option active"
+                        onclick="updateScanType('Initial Identification')">Initial Identification</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('Network Scan')">Network Scan</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('UDP Port Scan')">UDP Port Scan</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('Website Analysis & Security')">Website
+                        Analysis & Security</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('Subdomain Enumeration')">Subdomain
+                        Enumeration</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('Web Hub Scan')">Web Hub Scan</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('Search Engine Intelligence')">Search
+                        Engine Intelligence</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('Email & User Information')">Email &
+                        User Information</button>
+                    <button class="btn btn-scan-option" onclick="updateScanType('All Scan')">All Scan</button>
+                </div>
+                <div id="scan-status" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="report-view" id="mainReportContainer"></div>
+    </div>
+
+
+    <script>
+
+        function updateTheme() {
+            const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+        }
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', updateTheme);
+        updateTheme(); 
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentScanType = 'Initial identification';
+
+        window.onload = () => updateScanType('Initial identification');
+
+        function updateScanType(choice) {
+            currentScanType = choice;
+
+
+            document.querySelectorAll('.btn-scan-option').forEach(btn => {
+
+                if (btn.innerText === choice) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+
+            const typeDropdown = document.getElementById('targetType');
+            if (choice === 'Network Scan' || choice === 'UDP Port Scan') {
+                typeDropdown.style.display = 'block';
+            } else {
+                typeDropdown.style.display = 'none';
+                typeDropdown.value = 'website';
+            }
+
+            const container = document.getElementById('mainReportContainer');
+            if (container) {
+                container.innerHTML = getHtmlForScan(choice, true);
+            }
+        }
+
+        function getHtmlForScan(choice, showHeader = true) {
+            if (choice === 'UDP Port Scan') {
+                return `
+                ${showHeader ? '<h5 id="section-udp" class="mt-0 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">Tool: NMAP</h5>' : ''}
+                <div class="accordion" id="udpAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#udpTarget">
+                                <span>UDP Target Resolution</span>
+                                <span class="badge-recon color-purple">Infrastructure Info</span>
+                            </button>
+                        </h2>
+                        <div id="udpTarget" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="meta-label">Primary Endpoint</div>
+                                        <div class="meta-value" id="udp-res-endpoint">---</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="meta-label">Resolved IP</div>
+                                        <div class="meta-value" id="udp-res-ip">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#udpPorts">
+                                <span>Open UDP Ports</span>
+                                <span class="badge-recon color-red">UDP Open Ports</span>
+                            </button>
+                        </h2>
+                        <div id="udpPorts" class="accordion-collapse collapse">
+                            <div class="accordion-body" id="udp-port-results">
+                                <div class="meta-label">Discovered UDP Ports</div>
+                                <div class="meta-value">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (choice === 'All Scan') {
+                return `
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="sidebar-sticky">
+                            <h6 class="text-uppercase fw-bold mb-3 ps-2" style="color:var(--text-main); font-size:0.8rem;">Navigation</h6>
+                            <a href="#section-initial" class="sidebar-nav-item">Initial Identification</a>
+                            <a href="#section-network" class="sidebar-nav-item">Network Scan</a>
+                            <a href="#section-udp" class="sidebar-nav-item">UDP Port Scan</a>
+                            <a href="#section-web" class="sidebar-nav-item">Website Analysis & Security</a>
+                            <a href="#section-sub" class="sidebar-nav-item">Subdomain Enumeration</a>
+                            <a href="#section-hub" class="sidebar-nav-item">Web Hub Scan</a>
+                            <a href="#section-search" class="sidebar-nav-item">Search Engine Intelligence</a>
+                            <a href="#section-email" class="sidebar-nav-item">Email & User Information</a>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <h5 id="section-initial" class="mt-0 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">INITIAL IDENTIFICATION (WHOIS, GEOIP, HSTS & THEHARVESTER)</h5>
+                        ${getHtmlForScan('Initial identification', false)}
+
+                        <h5 id="section-network" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">NETWORK SCAN (NMAP)</h5>
+                        ${getHtmlForScan('Network Scan', false)}
+                        
+                        <h5 id="section-udp" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">UDP PORT SCAN (NMAP)</h5>
+                        ${getHtmlForScan('UDP Port Scan', false)}
+                        
+                        <h5 id="section-web" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">WEBSITE ANALYSIS & SECURITY (NIKTO)</h5>
+                        ${getHtmlForScan('Website Analysis & Security', false)}
+
+                        <h5 id="section-sub" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">SUBDOMAIN ENUMERATION (AMASS)</h5>
+                        ${getHtmlForScan('Subdomain Enumeration', false)}
+
+                        <h5 id="section-hub" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">WEB HUB SCAN (WAPPALYZER & WAYBACKMACHINE)</h5>
+                        ${getHtmlForScan('Web Hub Scan', false)}
+                        
+                        <h5 id="section-search" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">SEARCH ENGINE INTELLIGENCE (GOOGLE DORKS)</h5>
+                        ${getHtmlForScan('Search Engine Intelligence', false)}
+                        
+                        <h5 id="section-email" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">EMAIL & USER INFORMATION (THEHARVESTER)</h5>
+                        ${getHtmlForScan('Email & User Information', false)}
+                    </div>
+                </div>`;
+            } else if (choice === 'Initial identification' || choice === 'Initial Identification') {
+                return `
+                ${showHeader ? '<h5 id="section-whois" class="mt-0 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">TOOL: WHOIS</h5>' : ''}
+                <div class="accordion" id="initialAccordionWhois">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#whois">
+                                <span>ASN & IP Details</span>
+                                <span class="badge-recon color-blue">WHOIS Lookup</span>
+                            </button>
+                        </h2>
+                        <div id="whois" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="meta-label">ASN</div>
+                                        <div class="meta-value" id="init-asn">---</div>
+                                        <div class="meta-label">ASN Description</div>
+                                        <div class="meta-value" id="init-asn-desc">---</div>
+                                        <div class="meta-label">ASN Country</div>
+                                        <div class="meta-value" id="init-asn-country">---</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="meta-label">Network Name</div>
+                                        <div class="meta-value" id="init-net-name">---</div>
+                                        <div class="meta-label">IP Range (CIDR)</div>
+                                        <div class="meta-value" id="init-ip-range">---</div>
+                                        <div class="meta-label">Registry</div>
+                                        <div class="meta-value" id="init-registry">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${showHeader ? '<h5 id="section-geoip" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">TOOL: GEOIPLOOKUP</h5>' : ''}
+                <div class="accordion" id="initialAccordionGeo">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#geoip">
+                                <span>Geolocation</span>
+                                <span class="badge-recon color-teal">GeoIP Location</span>
+                            </button>
+                        </h2>
+                        <div id="geoip" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="meta-label">Country</div>
+                                        <div class="meta-value" id="init-geo-country">---</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="meta-label">City</div>
+                                        <div class="meta-value" id="init-geo-city">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${showHeader ? '<h5 id="section-hsts" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">TOOL: HSTS CHECKER</h5>' : ''}
+                <div class="accordion" id="initialAccordionHSTS">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#hsts">
+                                <span>HSTS Security Check</span>
+                                <span class="badge-recon color-purple">HSTS Header</span>
+                            </button>
+                        </h2>
+                        <div id="hsts" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="meta-label">HSTS Presence</div>
+                                        <div class="meta-value" id="init-hsts-val">---</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="meta-label">Strength</div>
+                                        <div class="meta-value" id="init-hsts-strength">---</div>
+                                    </div>
+                                </div>
+                                <div class="meta-label">Header Details</div>
+                                <div class="meta-value" id="init-hsts-header" style="font-size: 0.85rem;">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${showHeader ? '<h5 id="section-harvester" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">TOOL: THEHARVESTER</h5>' : ''}
+                <div class="accordion" id="initialAccordionHarvester">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#harvester">
+                                <span>Hosting provider</span>
+                                <span class="badge-recon color-orange">Web Server</span>
+                            </button>
+                        </h2>
+                        <div id="harvester" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Hosting Provider</div>
+                                <div class="meta-value" id="init-hosting-provider">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (choice === 'Web Hub Scan') {
+                return `
+                ${showHeader ? '<h5 id="section-wayback" class="mt-0 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">TOOL: WaybackMachine</h5>' : ''}
+                <div class="accordion" id="webHubAccordionWayback">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sensitive">
+                                <span>Sensitive Domain</span>
+                                <span class="badge-recon color-red">Exposed Historical URLs</span>
+                            </button>
+                        </h2>
+                        <div id="sensitive" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Sensitive Domain Details</div>
+                                <div class="meta-value" id="hub-sensitive">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apiEndpoints">
+                                <span>API Endpoints</span>
+                                <span class="badge-recon color-blue">Discovered API Paths</span>
+                            </button>
+                        </h2>
+                        <div id="apiEndpoints" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">API Endpoint Details</div>
+                                <div class="meta-value" id="hub-api">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#otherUrls">
+                                <span>Other URLs</span>
+                                <span class="badge-recon color-teal">General Historical URLs</span>
+                            </button>
+                        </h2>
+                        <div id="otherUrls" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Other Historical URLs</div>
+                                <div class="meta-value" id="hub-others">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${showHeader ? '<h5 id="section-wappalyzer" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">TOOL: WAPPALYZER</h5>' : ''}
+                <div class="accordion" id="webHubAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#banner">
+                                <span>Banner Grabbing</span>
+                                <span class="badge-recon color-purple">Banner Fingerprinting</span>
+                            </button>
+                        </h2>
+                        <div id="banner" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Banner Details</div>
+                                <div class="meta-value" id="hub-banner">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#webservices">
+                                <span>Web Services</span>
+                                <span class="badge-recon color-blue">Web Server</span>
+                            </button>
+                        </h2>
+                        <div id="webservices" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Detected Services</div>
+                                <div class="meta-value" id="hub-services">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#lang">
+                                <span>Programming Language</span>
+                                <span class="badge-recon color-green">Backend Language</span>
+                            </button>
+                        </h2>
+                        <div id="lang" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Languages</div>
+                                <div class="meta-value" id="hub-lang">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#frameworks">
+                                <span>Frameworks</span>
+                                <span class="badge-recon color-yellow">Web Framework</span>
+                            </button>
+                        </h2>
+                        <div id="frameworks" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Frameworks</div>
+                                <div class="meta-value" id="hub-frameworks">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cms">
+                                <span>CMS</span>
+                                <span class="badge-recon color-orange">Content Management System</span>
+                            </button>
+                        </h2>
+                        <div id="cms" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Content Management System</div>
+                                <div class="meta-value" id="hub-cms">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#techs">
+                                <span>Technology Used</span>
+                                <span class="badge-recon color-purple">Technology Stack</span>
+                            </button>
+                        </h2>
+                        <div id="techs" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Detailed List</div>
+                                <div class="meta-value" id="hub-techs">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (choice === 'Email & User Information') {
+                return `
+                ${showHeader ? '<h5 id="section-email" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">Tool: TheHarvester</h5>' : ''}
+                    <div class="accordion" id="userAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#usernames">
+                                    <span>Usernames Discovery</span>
+                                    <span class="badge-recon color-yellow">Discovered Usernames</span>
+                                </button>
+                            </h2>
+                            <div id="usernames" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div class="meta-label">Discovered Usernames</div>
+                                    <div class="meta-value">---</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#emails">
+                                    <span>Email Addresses</span>
+                                    <span class="badge-recon color-orange">Exposed Email Addresses</span>
+                                </button>
+                            </h2>
+                            <div id="emails" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div class="meta-label">Discovered Emails</div>
+                                    <div class="meta-value">---</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#employees">
+                                    <span>Employee Information</span>
+                                    <span class="badge-recon color-yellow">Employee OSINT Data</span>
+                                </button>
+                            </h2>
+                            <div id="employees" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div class="meta-label">Identified Personnel</div>
+                                    <div class="meta-value">---</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (choice === 'Website Analysis & Security') {
+                return `
+                ${showHeader ? '<h5 id="section-web" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">Tool: Nikto</h5>' : ''}
+                    <div class="accordion" id="webAnalysisAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#scanInfo">
+                                    <span>Scan Information</span>
+                                    <span class="badge-recon type-web">Engine</span>
+                                </button>
+                            </h2>
+                            <div id="scanInfo" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div id="web-scan-info-container">
+                                        <div id="web-scan-info" class="meta-value">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#targetInfo">
+                                    <span>Target Information</span>
+                                    <span class="badge-recon color-blue">Target Host</span>
+                                </button>
+                            </h2>
+                            <div id="targetInfo" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div id="web-target-details-container">
+                                        <div id="web-target-details" class="meta-value">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sslTls">
+                                    <span>SSL Information</span>
+                                    <span class="badge-recon color-green">SSL/TLS Analysis</span>
+                                </button>
+                            </h2>
+                            <div id="sslTls" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div id="web-ssl-info-container">
+                                        <div id="web-ssl-info" class="meta-value">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#serverHeaders">
+                                    <span>Server & Headers Information</span>
+                                    <span class="badge-recon color-yellow">Security Headers</span>
+                                </button>
+                            </h2>
+                            <div id="serverHeaders" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div id="web-header-info-container">
+                                        <div id="web-header-info" class="meta-value">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#findings">
+                                    <span>Vulnerabilities</span>
+                                    <span class="badge-recon color-red">Vulnerabilities</span>
+                                </button>
+                            </h2>
+                            <div id="findings" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div id="web-findings-container">
+                                        <div id="web-findings" class="meta-value">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cookieIssues">
+                                    <span>Cookie Security Issues</span>
+                                    <span class="badge-recon color-orange">Cookie Flags</span>
+                                </button>
+                            </h2>
+                            <div id="cookieIssues" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div id="web-cookie-issues-container">
+                                        <div id="web-cookie-issues" class="meta-value">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#errors">
+                                    <span>Errors</span>
+                                    <span class="badge-recon color-grey">Scan Logs</span>
+                                </button>
+                            </h2>
+                            <div id="errors" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div id="web-errors-container">
+                                        <div id="web-errors" class="meta-value">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+            } else if (choice === 'Subdomain Enumeration') {
+                return `
+                ${showHeader ? '<h5 id="section-sub" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">Tool: Amass</h5>' : ''}
+                <div class="accordion" id="subdomainAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#wildcard">
+                                <span>Wildcard DNS Detection</span>
+                                <span class="badge-recon color-blue">DNS Enumeration</span>
+                            </button>
+                        </h2>
+                        <div id="wildcard" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">DNS Wildcard Status</div>
+                                <div class="meta-value" id="sd-wildcard-status">---</div>
+                                <div class="meta-label">Detection Method</div>
+                                <div class="meta-value" id="sd-wildcard-method">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#san">
+                                <span>SSL SAN Entries</span>
+                                <span class="badge-recon color-green">SSL SAN Discovery</span>
+                            </button>
+                        </h2>
+                        <div id="san" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">SSL Subject Alternative Names</div>
+                                <div class="meta-value" id="sd-san-list">---</div>
+                                <div class="meta-label">Total Unique Entries</div>
+                                <div class="meta-value" id="sd-san-count">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#active">
+                                <span>Active Subdomains</span>
+                                <span class="badge-recon color-red">Active Subdomains</span>
+                            </button>
+                        </h2>
+                        <div id="active" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Active Subdomain List & IPs</div>
+                                <div class="meta-value" id="sd-active-list">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#historical">
+                                <span>Historical Domains</span>
+                                <span class="badge-recon color-orange">Historical Subdomains</span>
+                            </button>
+                        </h2>
+                        <div id="historical" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Historical URL</div>
+                                <div class="meta-value" id="sd-historical-list">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#takeover">
+                                <span>Takeover Candidates</span>
+                                <span class="badge-recon color-red">Subdomain Takeover Risk</span>
+                            </button>
+                        </h2>
+                        <div id="takeover" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Vulnerability Status</div>
+                                <div class="meta-value">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (choice === 'Search Engine Intelligence') {
+                return `
+                ${showHeader ? '<h5 id="section-search" class="mt-5 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">Tool: Google Dorks</h5>' : ''}
+                <div class="accordion" id="reconAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#robots">
+                                <span>Robots Analysis</span>
+                                <span class="badge-recon color-yellow">robots.txt Analysis</span>
+                            </button>
+                        </h2>
+                        <div id="robots" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Robots.txt Location</div>
+                                <div class="meta-value" id="se-robots-url">---</div>
+                                <div class="meta-label">Discovery Status</div>
+                                <div class="meta-value" id="se-robots-status">---</div>
+                                <div class="meta-label">Disallowed Paths Preview</div>
+                                <div class="meta-value" id="se-robots-content">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sitemap">
+                                <span>Sitemap Discovery</span>
+                                <span class="badge-recon color-blue">sitemap.xml Discovery</span>
+                            </button>
+                        </h2>
+                        <div id="sitemap" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Sitemap.xml URL</div>
+                                <div class="meta-value" id="se-sitemap-url">---</div>
+                                <div class="meta-label">Discovered Entries Count</div>
+                                <div class="meta-value" id="se-sitemap-count">---</div>
+                                <div class="meta-label">URL List Preview</div>
+                                <div class="meta-value" id="se-sitemap-list" style="max-height: 150px; overflow-y: auto;">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#files">
+                                <span>File Security Check</span>
+                                <span class="badge-recon color-red">Sensitive File Exposure</span>
+                            </button>
+                        </h2>
+                        <div id="files" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Total Sensitive Files Found</div>
+                                <div class="meta-value" id="se-files-count">---</div>
+                                <div class="meta-label">Exposed File List</div>
+                                <div class="meta-value" id="se-files-list">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dorks">
+                                <span>OSINT Links</span>
+                                <span class="badge-recon color-purple">External Intelligence Links</span>
+                            </button>
+                        </h2>
+                        <div id="dorks" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-label">Search Provider</div>
+                                <div class="meta-value">Google OSINT</div>
+                                <div class="meta-label">Active Dork Results</div>
+                                <div class="meta-value" id="se-dorks-list">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                return `
+                ${showHeader ? '<h5 id="section-network" class="mt-0 mb-3 pb-2 border-bottom border-secondary text-uppercase fw-bold text-primary">Tool: NMAP</h5>' : ''}
+                <div class="accordion" id="mainReport">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#host">
+                                <span>Target Resolution</span>
+                                <span class="badge-recon color-purple">Infrastructure Info</span>
+                            </button>
+                        </h2>
+                        <div id="host" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="meta-label">Primary Endpoint</div>
+                                        <div class="meta-value" id="res-endpoint">---</div>
+                                        <div class="meta-label">Reverse DNS</div>
+                                        <div class="meta-value" id="res-rdns">---</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="meta-label">Resolved IP</div>
+                                        <div class="meta-value" id="res-ip">---</div>
+                                        <div class="meta-label">Website Found</div>
+                                        <div class="meta-value" id="res-website">---</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#stack">
+                                <span>Environment Details</span>
+                                <span class="badge-recon color-red">TCP Open Ports</span>
+                            </button>
+                        </h2>
+                        <div id="stack" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="meta-value" id="port-results">---</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sqli">
+                                <span>Vulnerability Findings</span>
+                                <span class="badge-recon color-yellow">Security Posture</span>
+                            </button>
+                        </h2>
+                        <div id="sqli" class="accordion-collapse collapse">
+                            <div class="accordion-body" id="cve-results">
+                                <p class="fw-bold">---</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#headers">
+                                <span>SSL Certificate Details</span>
+                                <span class="badge-recon color-green">SSL Certificate</span>
+                            </button>
+                        </h2>
+                        <div id="headers" class="accordion-collapse collapse">
+                            <div class="accordion-body" id="ssl-results">
+                                <p class="text-muted">---</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        }
+
+        async function startScan() {
+            const target = document.getElementById('targetInput').value;
+            const targetType = document.getElementById('targetType').value;
+            const btn = document.getElementById('scanBtn');
+            const scanType = currentScanType;
+
+            if (!target) {
+                alert("Please enter a target!");
+                return;
+            }
+
+
+            const statusContainer = document.getElementById('scan-status');
+            if (statusContainer) statusContainer.innerHTML = '';
+
+
+
+            const mainReportContainer = document.getElementById('mainReportContainer');
+
+
+            btn.innerText = "Scanning";
+            btn.disabled = true;
+
+            const port = 8000;
+
+            try {
+                const typeLower = scanType.toLowerCase();
+                const pingTypes = ["initial", "network", "website", "webanalysis", "web analysis", "sub domain", "subdomain", "all", "udp", "full udp"];
+                const needsPing = pingTypes.some(t => typeLower.includes(t));
+
+
+                if (statusContainer) statusContainer.innerHTML = '<div class="alert alert-secondary text-center"><i class="fas fa-database me-2"></i>Checking for cached results...</div>';
+
+                const cacheResp = await fetch(`/check_cache?target=${target}&type=${encodeURIComponent(scanType)}`);
+                const cacheData = await cacheResp.json();
+
+                if (cacheData.exists) {
+                    if (statusContainer) statusContainer.innerHTML = '<div class="alert alert-success text-center"><i class="fas fa-history me-2"></i>Loading catched data...</div>';
+
+                } else {
+                    if (statusContainer) statusContainer.innerHTML = '<div class="alert alert-secondary text-center"><i class="fas fa-search me-2"></i>Catch data not found. Running Scan...</div>';
+
+                    if (needsPing) {
+                        const pingResp = await fetch(`/ping?target=${target}`);
+                        const pingData = await pingResp.json();
+
+                        if (!pingData.alive) {
+                            if (statusContainer) {
+                                statusContainer.innerHTML = `<div class="alert alert-danger text-center fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Host not Reachable</div>`;
+                            }
+                            btn.innerText = "SCAN";
+                            btn.disabled = false;
+                            return;
+                        } else {
+                            if (statusContainer) {
+                                statusContainer.innerHTML = `<div class="alert alert-success text-center fw-bold"><i class="fas fa-check-circle me-2"></i>Host Reachable</div>`;
+                            }
+                        }
+                    }
+                }
+
+
+                const response = await fetch(`/scan?target=${target}&type=${encodeURIComponent(scanType)}&target_type=${encodeURIComponent(targetType)}`);
+
+                if (!response.ok) {
+                    let errorText;
+                    try {
+                        errorText = await response.text();
+                    } catch (e) {
+                        errorText = response.statusText;
+                    }
+                    throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 50)}`);
+                }
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error("Invalid format received from server (might be a timeout).");
+                }
+
+
+                if (data.error === "Host not Reachable") {
+                    if (statusContainer) {
+                        statusContainer.innerHTML = `<div class="alert alert-danger text-center fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Host not Reachable</div>`;
+                    }
+                    return;
+                }
+
+                if (data.error) {
+                    alert("Scan Error: " + data.error);
+                    console.error("Backend Error:", data.error);
+                    if (statusContainer) statusContainer.innerHTML = `<div class="alert alert-danger text-center fw-bold">Error: ${data.error}</div>`;
+                    return;
+                }
+
+
+
+
+
+                const typeNormalized = scanType.toLowerCase().replace(/\s+/g, ' ').trim();
+                const isAll = typeNormalized === 'all scan';
+                console.log("Routing to Port:", port, "for Type:", typeNormalized);
+
+
+                if (isAll || typeNormalized.includes('initial')) {
+                    const initData = data.initial_id || {};
+                    if (document.getElementById('init-asn')) document.getElementById('init-asn').innerText = initData.asn || "---";
+                    if (document.getElementById('init-asn-desc')) document.getElementById('init-asn-desc').innerText = initData.asn_description || "---";
+                    if (document.getElementById('init-asn-country')) document.getElementById('init-asn-country').innerText = initData.asn_country || "---";
+                    if (document.getElementById('init-net-name')) document.getElementById('init-net-name').innerText = initData.network_name || "---";
+                    if (document.getElementById('init-ip-range')) document.getElementById('init-ip-range').innerText = initData.ip_range || "---";
+                    if (document.getElementById('init-registry')) document.getElementById('init-registry').innerText = initData.registry || "---";
+
+                    if (document.getElementById('init-geo-country')) document.getElementById('init-geo-country').innerText = initData.country || "---";
+                    if (document.getElementById('init-geo-city')) document.getElementById('init-geo-city').innerText = initData.city || "---";
+                    if (document.getElementById('init-hsts-val')) document.getElementById('init-hsts-val').innerText = initData.hsts_presence || "---";
+                    if (document.getElementById('init-hsts-strength')) document.getElementById('init-hsts-strength').innerText = initData.hsts_strength || "---";
+                    if (document.getElementById('init-hsts-header')) document.getElementById('init-hsts-header').innerText = initData.hsts_header || "---";
+                    if (document.getElementById('init-hosting-provider')) document.getElementById('init-hosting-provider').innerText = initData.hosting_provider || "---";
+                }
+
+
+                if (isAll || typeNormalized.includes('website analysis')) {
+                    const webData = data.website_analysis || {};
+
+                    const renderTwoColumnList = (elementId, dataList, defaultText) => {
+                        const el = document.getElementById(elementId);
+                        if (!el) return;
+
+                        if (Array.isArray(dataList) && dataList.length > 0) {
+                            let html = '<div class="row">';
+                            dataList.forEach(item => {
+                                if (typeof item === 'object' && item.label) {
+                                    html += `<div class="col-md-6 mb-3">
+                                        <div class="meta-label">${item.label}</div>
+                                        <div class="meta-value" style="word-break: break-all;">${item.value}</div>
+                                    </div>`;
+                                } else {
+                                    html += `<div class="col-md-6 pb-1 mb-1">${item}</div>`;
+                                }
+                            });
+                            html += '</div>';
+                            el.innerHTML = html;
+                        } else {
+                            el.innerText = defaultText;
+                        }
+                    };
+
+                    const renderList = (elementId, dataList, defaultText) => {
+                        const el = document.getElementById(elementId);
+                        if (!el) return;
+
+                        if (Array.isArray(dataList) && dataList.length > 0) {
+                            let html = '<div class="row">';
+                            dataList.forEach(item => {
+                                if (typeof item === 'object' && item.label) {
+                                    html += `<div class="col-12 mb-3">
+                                        <div class="meta-label">${item.label}</div>
+                                        <div class="meta-value" style="word-break: break-all;">${item.value}</div>
+                                    </div>`;
+                                } else {
+
+                                    html += `<div class="col-12 pb-1 mb-1">${item}</div>`;
+                                }
+                            });
+                            html += '</div>';
+                            el.innerHTML = html;
+                        } else {
+                            el.innerText = defaultText;
+                        }
+                    };
+
+                    renderTwoColumnList('web-scan-info', webData.scan_info, "---");
+                    renderTwoColumnList('web-target-details', webData.target_details, "---");
+                    renderTwoColumnList('web-ssl-info', webData.ssl_info, "---");
+                    renderList('web-header-info', webData.header_info, "---");
+                    renderList('web-findings', webData.findings, "No critical issues found.");
+                    renderList('web-cookie-issues', webData.cookie_issues, "No specific cookie issues identified.");
+                    renderList('web-errors', webData.errors, "None");
+                }
+
+
+                if (isAll || typeNormalized.includes('web server') || typeNormalized.includes('email') || typeNormalized.includes('user')) {
+                    const uiData = data.user_info || {};
+                    const userVal = document.querySelector('#usernames .meta-value');
+                    if (userVal) {
+                        if (uiData.usernames && uiData.usernames.length > 0) {
+                            let html = `<div class="d-flex flex-wrap gap-2">`;
+                            uiData.usernames.forEach(u => html += `<span class="tag" style="color:#ff9933; border-color:#ff9933;">${u}</span>`);
+                            userVal.innerHTML = html + `</div>`;
+                        } else {
+                            userVal.innerHTML = `<span class="fst-italic text-muted">No usernames found on the target pages.</span>`;
+                        }
+                    }
+                    const emailVal = document.querySelector('#emails .meta-value');
+                    if (emailVal) {
+                        if (uiData.emails && uiData.emails.length > 0) {
+                            let html = "";
+                            uiData.emails.forEach(e => html += `<div class="meta-value">${e}</div>`);
+                            emailVal.innerHTML = html;
+                        } else {
+                            emailVal.innerHTML = `<span class="fst-italic text-muted">No email addresses detected during scraping.</span>`;
+                        }
+                    }
+                }
+
+                if (isAll || typeNormalized.includes('search engine')) {
+                    const seData = data.search_engine || {};
+                    if (document.getElementById('se-robots-status')) document.getElementById('se-robots-status').innerText = seData.robots.found ? "Found" : "Not Found";
+                    if (document.getElementById('se-robots-url')) document.getElementById('se-robots-url').innerHTML = `<a href="${seData.robots.url}" target="_blank">${seData.robots.url}</a>`;
+                    if (document.getElementById('se-robots-content')) document.getElementById('se-robots-content').innerText = seData.robots.content ? seData.robots.content.substring(0, 200) + "..." : "N/A";
+
+                    if (document.getElementById('se-sitemap-status')) document.getElementById('se-sitemap-status').innerText = seData.sitemap.found ? "Found" : "Not Found";
+                    if (document.getElementById('se-sitemap-url')) document.getElementById('se-sitemap-url').innerHTML = `<a href="${seData.sitemap.url}" target="_blank">${seData.sitemap.url}</a>`;
+                    if (document.getElementById('se-sitemap-count') && seData.sitemap.entries) document.getElementById('se-sitemap-count').innerText = seData.sitemap.entries.length;
+
+                    const sitemapList = document.getElementById('se-sitemap-list');
+                    if (sitemapList && seData.sitemap.entries && seData.sitemap.entries.length > 0) {
+                        let html = "";
+                        seData.sitemap.entries.forEach(url => html += `<div><a href="${url}" target="_blank" style="text-decoration:none; color:var(--text-main);">${url}</a></div>`);
+                        sitemapList.innerHTML = html;
+                    }
+
+                    if (document.getElementById('se-files-count') && seData.files) document.getElementById('se-files-count').innerText = seData.files.length;
+                    const filesList = document.getElementById('se-files-list');
+                    if (filesList) {
+                        if (seData.files && seData.files.length > 0) {
+                            let html = "";
+                            seData.files.forEach(f => html += `<div class="alert alert-danger py-1 px-2 mb-1" style="font-size:0.9rem;">${f}</div>`);
+                            filesList.innerHTML = html;
+                        } else {
+                            filesList.innerText = "No sensitive files exposure detected.";
+                        }
+                    }
+
+                    const dorksList = document.getElementById('se-dorks-list');
+                    if (dorksList && seData.dorks) {
+                        let html = `<div class="d-flex flex-column gap-2">`;
+                        seData.dorks.forEach(d => html += `<div class="d-flex justify-content-between align-items-center border p-2 rounded"><span style="font-family:'JetBrains Mono'; font-size:0.8rem;">${d.query}</span><a href="${d.url}" target="_blank" class="btn btn-sm btn-dork-open" style="font-size:0.7rem;">OPEN</a></div>`);
+                        dorksList.innerHTML = html + `</div>`;
+                    }
+                }
+
+                if (isAll || typeNormalized.includes('subdomain') || data.sub_domain) {
+                    const sdData = data.sub_domain || {};
+                    if (document.getElementById('sd-wildcard-status')) document.getElementById('sd-wildcard-status').innerText = sdData.wildcard_detected ? "DETECTED (Potential noise)" : "NOT DETECTED";
+                    if (document.getElementById('sd-wildcard-method')) document.getElementById('sd-wildcard-method').innerText = "DNS Query Discovery";
+
+                    if (document.getElementById('sd-san-count') && sdData.ssl_san_entries) document.getElementById('sd-san-count').innerText = sdData.ssl_san_entries.length;
+                    const sanList = document.getElementById('sd-san-list');
+                    if (sanList && sdData.ssl_san_entries && sdData.ssl_san_entries.length > 0) {
+                        let html = `<div style="max-height: 200px; overflow-y: auto; font-size: 0.9rem;">`;
+                        sdData.ssl_san_entries.slice(0, 200).forEach(entry => html += `<div>${entry}</div>`);
+                        if (sdData.ssl_san_entries.length > 200) html += `<div class="text-muted mt-1">...and ${sdData.ssl_san_entries.length - 200} more</div>`;
+                        sanList.innerHTML = html + `</div>`;
+                    }
+
+                    const activeList = document.getElementById('sd-active-list');
+                    if (activeList) {
+                        const activeEntries = Object.entries(sdData.active_subdomains || {});
+                        if (activeEntries.length > 0) {
+                            let html = `<div style="max-height: 200px; overflow-y: auto;">`;
+                            activeEntries.slice(0, 200).forEach(([sub, ip]) => {
+                                html += `<div class="d-flex justify-content-between border-bottom py-1"><span>${sub}</span><span class="text-muted">${ip}</span></div>`;
+                            });
+                            if (activeEntries.length > 200) html += `<div class="text-muted mt-1">...and ${activeEntries.length - 200} more</div>`;
+                            activeList.innerHTML = html + `</div>`;
+                        } else {
+                            activeList.innerText = "No active subdomains resolved.";
+                        }
+                    }
+
+                    const historicalList = document.getElementById('sd-historical-list');
+                    if (historicalList) {
+                        if (sdData.historical_domains && sdData.historical_domains.length > 0) {
+                            let html = `<div style="max-height: 200px; overflow-y: auto;">`;
+                            sdData.historical_domains.slice(0, 200).forEach(h => html += `<div>${h}</div>`);
+                            if (sdData.historical_domains.length > 200) html += `<div class="text-muted mt-1">...and ${sdData.historical_domains.length - 200} more</div>`;
+                            historicalList.innerHTML = html + `</div>`;
+                        } else {
+                            historicalList.innerText = "No historical records found.";
+                        }
+                    }
+
+                    const takeoverContainer = document.querySelector('#takeover .accordion-body');
+                    if (takeoverContainer) {
+                        const takeoverKeys = Object.keys(sdData.takeover_candidates || {});
+                        if (takeoverKeys.length > 0) {
+                            let html = `<div class="meta-label">Action Required</div>`;
+                            for (const [sub, info] of Object.entries(sdData.takeover_candidates)) {
+                                html += `<div class="alert alert-danger py-1 px-2 mb-1" style="font-size:0.9rem;"><strong>${sub}</strong>: ${info}</div>`;
+                            }
+                            takeoverContainer.innerHTML = html;
+                        } else {
+                            takeoverContainer.innerHTML = `<div class="meta-label">Vulnerability Status</div><div class="meta-value">Secure: No takeover candidates found.</div>`;
+                        }
+                    }
+                }
+
+
+
+                if (isAll || typeNormalized.includes('web hub') || typeNormalized.includes('wappalyzer')) {
+                    const hubData = data.web_hub || {};
+                    if (document.getElementById('hub-sensitive')) {
+                        const sensitiveData = hubData.sensitive;
+                        const container = document.getElementById('hub-sensitive');
+
+                        if (Array.isArray(sensitiveData) && sensitiveData.length > 0) {
+                            let html = `<div class="meta-label">Sensitive Endpoints (${sensitiveData.length})</div><div style="max-height: 300px; overflow-y: auto;">`;
+                            sensitiveData.slice(0, 200).forEach(url => {
+                                html += `
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2 pe-2">
+                                    <span class="text-truncate me-2" style="font-size: 0.9rem; font-family:'JetBrains Mono';">${url}</span>
+                                    <a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold" style="font-size: 0.7rem; min-width: 60px;">OPEN</a>
+                                </div>`;
+                            });
+                            if (sensitiveData.length > 200) html += `<div class="text-muted mt-2 text-center">...and ${sensitiveData.length - 200} more</div>`;
+                            html += `</div>`;
+                            container.innerHTML = html;
+                        } else if (typeof sensitiveData === 'string') {
+
+                            let text = sensitiveData.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                            if (text.length > 200) {
+                                container.innerHTML = `<div style="max-height: 300px; overflow-y: auto;">${text}</div>`;
+                            } else {
+                                container.innerHTML = text;
+                            }
+                        } else {
+                            container.innerText = "No sensitive endpoints found.";
+                        }
+                    }
+
+
+                    if (document.getElementById('hub-api')) {
+                        const apiData = hubData.api;
+                        const container = document.getElementById('hub-api');
+                        if (Array.isArray(apiData) && apiData.length > 0) {
+                            let html = `<div class="meta-label">API Endpoints (${apiData.length})</div><div style="max-height: 300px; overflow-y: auto;">`;
+                            apiData.slice(0, 200).forEach(url => {
+                                html += `
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2 pe-2">
+                                    <span class="text-truncate me-2" style="font-size: 0.9rem; font-family:'JetBrains Mono';">${url}</span>
+                                    <a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold" style="font-size: 0.7rem; min-width: 60px;">OPEN</a>
+                                </div>`;
+                            });
+                            if (apiData.length > 200) html += `<div class="text-muted mt-2 text-center">...and ${apiData.length - 200} more</div>`;
+                            html += `</div>`;
+                            container.innerHTML = html;
+                        } else {
+                            container.innerText = "No API endpoints found.";
+                        }
+                    }
+
+
+                    if (document.getElementById('hub-others')) {
+                        const othersData = hubData.others;
+                        const container = document.getElementById('hub-others');
+                        if (Array.isArray(othersData) && othersData.length > 0) {
+                            let html = `<div class="meta-label">General URLs (${othersData.length})</div><div style="max-height: 300px; overflow-y: auto;">`;
+                            othersData.slice(0, 200).forEach(url => {
+                                html += `
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2 pe-2">
+                                    <span class="text-truncate me-2" style="font-size: 0.9rem; font-family:'JetBrains Mono';">${url}</span>
+                                    <a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold" style="font-size: 0.7rem; min-width: 60px;">OPEN</a>
+                                </div>`;
+                            });
+                            if (othersData.length > 200) html += `<div class="text-muted mt-2 text-center">...and ${othersData.length - 200} more</div>`;
+                            html += `</div>`;
+                            container.innerHTML = html;
+                        } else {
+                            container.innerText = "No other URLs found.";
+                        }
+                    }
+                    if (document.getElementById('hub-banner')) document.getElementById('hub-banner').innerText = hubData.banner || "---";
+                    if (document.getElementById('hub-services')) document.getElementById('hub-services').innerText = hubData.services || "---";
+                    if (document.getElementById('hub-lang')) document.getElementById('hub-lang').innerText = hubData.languages || "---";
+                    if (document.getElementById('hub-frameworks')) document.getElementById('hub-frameworks').innerText = hubData.frameworks || "---";
+                    if (document.getElementById('hub-cms')) document.getElementById('hub-cms').innerText = hubData.cms || "---";
+                    if (document.getElementById('hub-techs')) document.getElementById('hub-techs').innerText = hubData.other_techs || "---";
+                }
+
+
+                if (isAll || typeNormalized.includes('udp')) {
+                    const udpData = data.udp_scan || {};
+                    const info = udpData.target_info || {};
+                    const ports = udpData.open_ports || [];
+
+                    if (document.getElementById('udp-res-endpoint')) document.getElementById('udp-res-endpoint').innerText = target || '---';
+                    if (document.getElementById('udp-res-ip')) document.getElementById('udp-res-ip').innerText = info.ip || '---';
+
+                    const portContainer = document.getElementById('udp-port-results');
+                    if (portContainer) {
+                        let portHtml = `<div class="meta-label">Open UDP Ports & Services</div>`;
+                        if (ports.length > 0) {
+                            ports.forEach(p => {
+                                const pPort = p.port || "";
+                                const pState = p.state || "";
+                                const pService = p.service || "";
+                                const pVersion = p.version ? `(${p.version})` : "";
+                                portHtml += `<div class="meta-value" style="font-size:0.9rem;">Port ${pPort}/udp | ${pState} | ${pService} <small>${pVersion}</small></div>`;
+                            });
+                        } else {
+                            const displayTarget = target || '---';
+                            const displayIp = info.ip || '---';
+                            portHtml += `<div class="meta-value" style="font-size:0.95rem;text-transform:none;">All 65536 scanned ports on ${displayTarget} (${displayIp}) are in ignored states.</div>`;
+                        }
+                        portContainer.innerHTML = portHtml;
+                    }
+                }
+
+
+
+                if (isAll || typeNormalized.includes('network') || (typeNormalized.includes('web hub') && !data.web_hub) ||
+                    (!typeNormalized.includes('website') && !typeNormalized.includes('web server') && !typeNormalized.includes('email') && !typeNormalized.includes('user') && !typeNormalized.includes('search') && !typeNormalized.includes('sub') && !typeNormalized.includes('initial') && !typeNormalized.includes('wappalyzer'))) {
+
+
+                    const netData = data.network_scan || data;
+
+                    const info = netData.target_info || {};
+                    const ports = netData.open_ports || netData.ports || [];
+                    const cves = netData.vulnerabilities || netData.cves || [];
+                    const ssl = netData.ssl_info || netData.ssl || [];
+
+
+                    if (document.getElementById('res-endpoint')) document.getElementById('res-endpoint').innerText = data.target || target || '---';
+                    if (document.getElementById('res-ip')) document.getElementById('res-ip').innerText = info.ip || data.ip || '---';
+                    if (document.getElementById('res-rdns')) document.getElementById('res-rdns').innerText = info.rdns || data.rdns || '---';
+                    if (document.getElementById('res-website')) document.getElementById('res-website').innerText = info.website_name || data.website || '---';
+
+
+                    const portContainer = document.getElementById('port-results');
+                    if (portContainer) {
+                        let portHtml = `<div class="meta-label">Open Ports & Services</div>`;
+                        if (ports.length > 0) {
+                            ports.forEach(p => {
+
+                                const pPort = p.port || "";
+                                const pProto = p.protocol ? "/" + p.protocol : "";
+                                const pService = p.service || "";
+                                const pVersion = p.version ? `(${p.version})` : "";
+                                portHtml += `<div class="meta-value" style="font-size:0.9rem;">Port ${pPort}${pProto} | ${pService} <small>${pVersion}</small></div>`;
+                            });
+                        } else { portHtml += `<div class="meta-value">No open ports found.</div>`; }
+                        portContainer.innerHTML = portHtml;
+                    }
+
+
+                    const cveContainer = document.getElementById('cve-results');
+                    if (cveContainer) {
+                        if (cves.length > 0) {
+                            let cveHtml = `<div class="meta-label mb-2">Detailed Vulnerability Findings</div>`;
+                            cveHtml += `<div class="d-flex flex-wrap gap-2 mt-2">`;
+                            cves.forEach(c => {
+                                if (typeof c === 'object') {
+                                    const cId = c.cve || "Unknown";
+                                    const score = c.score !== null ? parseFloat(c.score).toFixed(1) : "N/A";
+                                    const severity = c.severity ? c.severity.toUpperCase() : "UNKNOWN";
+                                    const hex = c.hex_code || "#9E9E9E";
+                                    cveHtml += `<a href="https://nvd.nist.gov/vuln/detail/${cId}" target="_blank" style="text-decoration: none;"><div style="border: 1px solid ${hex}; color: ${hex}; padding: 6px 12px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; background-color: transparent; transition: background-color 0.2s, color 0.2s;" onmouseover="this.style.backgroundColor='${hex}20';" onmouseout="this.style.backgroundColor='transparent';">${cId} (${score} ${severity})</div></a>`;
+                                } else {
+
+                                    cveHtml += `<a href="https://nvd.nist.gov/vuln/detail/${c}" target="_blank" style="text-decoration: none;"><div style="border: 1px solid var(--text-muted); color: var(--text-muted); padding: 6px 12px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; background-color: transparent; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)';" onmouseout="this.style.backgroundColor='transparent';">${c}</div></a>`;
+                                }
+                            });
+                            cveHtml += `</div>`;
+                            cveContainer.innerHTML = cveHtml;
+                        } else {
+                            cveContainer.innerHTML = `<p class="text-muted">No known vulnerabilities detected.</p>`;
+                        }
+                    }
+
+
+                    const sslContainer = document.getElementById('ssl-results');
+                    if (sslContainer) {
+                        if (ssl.length > 0) {
+                            let sslHtml = "";
+                            ssl.forEach(s => {
+                                sslHtml += `<div class="mb-3 pb-2">`;
+
+                                sslHtml += `<div class="meta-label">Issuer</div><div class="meta-value" style="font-size:0.9rem;">${s.issuer || "N/A"}</div>`;
+                                sslHtml += `<div class="meta-label">Subject</div><div class="meta-value" style="font-size:0.9rem;">${s.subject || "N/A"}</div>`;
+                                sslHtml += `<div class="meta-label">Validity</div><div class="meta-value" style="font-size:0.8rem;">${s.validity_start} TO ${s.validity_end}</div>`;
+                                sslHtml += `</div>`;
+                            });
+                            sslContainer.innerHTML = sslHtml;
+                        } else {
+                            sslContainer.innerHTML = "No SSL details found.";
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Connection Error:", error);
+
+                if (error instanceof TypeError && error.message.includes('fetch')) {
+                    if (statusContainer) statusContainer.innerHTML = `<div class="alert alert-danger text-center fw-bold">Network Error: Server Unreachable</div>`;
+                } else {
+                    alert(`Scan Logic Error: ${error.message || "An unexpected error occurred during " + scanType}`);
+                    if (statusContainer) statusContainer.innerHTML = `<div class="alert alert-danger text-center fw-bold">Error: ${error.message || "Execution Failed"}</div>`;
+                }
+            } finally {
+                btn.innerText = "Scan";
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+
+</html>

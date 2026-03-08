@@ -1,0 +1,17 @@
+fastapi
+uvicorn[full]
+pydantic
+jinja2
+python-multipart
+starlette
+requests
+beautifulsoup4
+python-nmap
+nvdlib
+dnspython
+ipwhois
+python-Wappalyzer
+urllib3
+itsdangerous
+email-validator
+setuptools==70.0.0
