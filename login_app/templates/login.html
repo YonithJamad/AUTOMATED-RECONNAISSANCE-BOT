@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconnaissance Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0a0a0a;
+            --bg-card: #141414;
+            --bg-element: #1f1f1f;
+            --border-color: #333333;
+            --text-main: #ffffff;
+            --text-muted: #ffffff;
+            --accent: #ffffff;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --scanline-color: rgba(255, 255, 255, 0.05);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-main: #ffffff;
+                --bg-card: #f8f9fa;
+                --bg-element: #e9ecef;
+                --text-main: #000000;
+                --text-muted: #000000;
+                --accent: #000000;
+                --border-color: #dee2e6;
+                --grid-color: #f0f0f0;
+                --scanline-color: rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        body {
+            background-color: var(--bg-main) !important;
+            color: var(--text-main) !important;
+            font-family: 'JetBrains Mono', monospace;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .auth-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--accent);
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .form-control {
+            background: var(--bg-element) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            background: var(--bg-element) !important;
+            color: var(--text-main) !important;
+            border-color: var(--accent) !important;
+            box-shadow: none;
+        }
+
+        .btn-execute {
+            background: var(--accent);
+            color: var(--bg-main);
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-execute:hover {
+            transform: scale(1.02);
+            background: var(--text-main);
+            color: var(--bg-main);
+        }
+
+        .link-muted {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .link-muted:hover {
+            color: var(--accent);
+        }
+
+        .scanline {
+            width: 100%;
+            position: fixed;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(0deg, transparent 0%, var(--scanline-color) 50%, transparent 100%);
+            height: 100px;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+
+        .logo-img {
+            height: 80px;
+            width: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanline"></div>
+    <div class="auth-container">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="{{ url_for('login_static', path='logo.svg') }}" alt="Logo" class="logo-img">
+        </div>
+        <h2>AUTOMATED RECONNAISSANCE BOT</h2>
+
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="alert alert-{{ msg.category }} form-control mb-3"
+            style="text-align: center; border: 1px solid #ff4d4d !important; color: #ff4d4d !important; background: rgba(255, 77, 77, 0.1) !important;">
+            {{ msg.message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <div class="mb-3">
+                <label class="form-label text-muted">Username</label>
+                <input type="text" class="form-control" name="username" required autocomplete="off">
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-muted">Password</label>
+                <input type="password" class="form-control" name="password" required>
+            </div>
+            <button type="submit" class="btn-execute">Login</button>
+        </form>
+    </div>
+
+    <script>
+        function updateTheme() {
+            const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+        }
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', updateTheme);
+        updateTheme();
+
+    </script>
+</body>
+
+</html>

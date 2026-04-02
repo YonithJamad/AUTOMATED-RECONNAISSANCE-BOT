@@ -1,0 +1,110 @@
+<svg width="680" height="360" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --teal: #00FFB2;
+      --amber: #FFB300;
+      --amber2: #FF8800;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --teal: #00FFB2;
+        --amber: #FFB300;
+        --amber2: #FF8800;
+      }
+    }
+    .trace  { fill: none; stroke: var(--teal); }
+    .node-r { fill: var(--teal); }
+    .hex    { fill: none; stroke: var(--teal); }
+    .ring   { fill: none; stroke: var(--teal); }
+    .cross  { stroke: var(--teal); fill: none; }
+    .sweep  { fill: var(--amber); }
+    .beam   { stroke: var(--amber); fill: none; }
+    .ping   { fill: var(--amber); stroke: var(--amber); }
+    .pip1   { fill: var(--amber); }
+    .pip2   { fill: var(--amber2); }
+  </style>
+
+  <!-- Circuit traces -->
+  <path class="trace" d="M340,52 L340,28 L312,28" stroke-width="3.5999999999999996" opacity=".9"/>
+  <rect class="node-r" x="308" y="24" width="16.0" height="16.0" rx="2" opacity=".8"/>
+
+  <path class="trace" d="M468,126 L492,108 L492,83" stroke-width="3.5999999999999996" opacity=".9"/>
+  <rect class="node-r" x="488" y="79" width="16.0" height="16.0" rx="2" opacity=".8"/>
+  <path class="trace" d="M492,95 L505,95" stroke-width="3.0" opacity=".55"/>
+  <rect class="node-r" x="503" y="91" width="12.0" height="12.0" rx="2" opacity=".45"/>
+
+  <path class="trace" d="M212,126 L188,108 L188,83" stroke-width="3.5999999999999996" opacity=".9"/>
+  <rect class="node-r" x="184" y="79" width="16.0" height="16.0" rx="2" opacity=".8"/>
+  <path class="trace" d="M188,95 L175,95" stroke-width="3.0" opacity=".55"/>
+  <rect class="node-r" x="169" y="91" width="12.0" height="12.0" rx="2" opacity=".45"/>
+
+  <path class="trace" d="M468,274 L492,292 L492,317" stroke-width="3.5999999999999996" opacity=".9"/>
+  <rect class="node-r" x="488" y="313" width="16.0" height="16.0" rx="2" opacity=".8"/>
+
+  <path class="trace" d="M212,274 L188,292 L188,317" stroke-width="3.5999999999999996" opacity=".9"/>
+  <rect class="node-r" x="184" y="313" width="16.0" height="16.0" rx="2" opacity=".8"/>
+
+  <!-- Outer hex ring -->
+  <polygon class="hex" points="340,52 468,126 468,274 340,348 212,274 212,126" stroke-width="5.4"/>
+
+  <!-- Inner hex echo -->
+  <polygon class="hex" points="340,64 457,130 457,270 340,336 223,270 223,130" stroke-width="1.5" opacity=".5"/>
+
+  <!-- Outer dashed detection ring -->
+  <circle class="ring" cx="340" cy="200" r="132.0" stroke-width="1.7999999999999998" stroke-dasharray="3 8" opacity=".6"/>
+
+  <!-- Concentric radar rings -->
+  <circle class="ring" cx="340" cy="200" r="108.0" stroke-width="1.7999999999999998" opacity=".65"/>
+  <circle class="ring" cx="340" cy="200" r="72.0"  stroke-width="1.7999999999999998" opacity=".55"/>
+  <circle class="ring" cx="340" cy="200" r="36.0"  stroke-width="1.7999999999999998" opacity=".45"/>
+
+  <!-- Crosshair -->
+  <line class="cross" x1="232" y1="200" x2="448" y2="200" stroke-width="1.7999999999999998" opacity=".5"/>
+  <line class="cross" x1="340" y1="92"  x2="340" y2="308" stroke-width="1.7999999999999998" opacity=".5"/>
+  <line class="cross" x1="264" y1="124" x2="416" y2="276" stroke-width="1.5" opacity=".4"/>
+  <line class="cross" x1="416" y1="124" x2="264" y2="276" stroke-width="1.5" opacity=".4"/>
+
+  <!-- Rotating radar sweep -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate"
+      from="0 340 200" to="360 340 200" dur="4s" repeatCount="indefinite"/>
+    <path class="sweep" d="M340,200 L340,92 A108,108 0,0,1 394,107 Z"  opacity=".15"/>
+    <path class="sweep" d="M340,200 L394,107 A108,108 0,0,1 433,146 Z" opacity=".4"/>
+    <path class="sweep" d="M340,200 L433,146 A108,108 0,0,1 448,200 Z" opacity=".4"/>
+    <line class="beam" x1="340" y1="200" x2="448" y2="200" stroke-width="5.4" opacity="1"/>
+  </g>
+
+  <!-- Ping target 1 -->
+  <g>
+    <animate attributeName="opacity" values=".15;1;.15" dur="2.4s" begin="0.6s" repeatCount="indefinite"/>
+    <circle class="pip1" cx="385" cy="152" r="8.75"/>
+    <line class="ping" x1="379" y1="152" x2="374" y2="152" stroke-width="2.7"/>
+    <line class="ping" x1="391" y1="152" x2="396" y2="152" stroke-width="2.7"/>
+    <line class="ping" x1="385" y1="146" x2="385" y2="141" stroke-width="2.7"/>
+    <line class="ping" x1="385" y1="158" x2="385" y2="163" stroke-width="2.7"/>
+  </g>
+
+  <!-- Ping target 2 -->
+  <circle class="pip1" cx="289" cy="166" r="6.25">
+    <animate attributeName="opacity" values=".1;.9;.1" dur="3.2s" begin="1.3s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Ping target 3 -->
+  <circle class="pip1" cx="397" cy="238" r="6.25">
+    <animate attributeName="opacity" values=".1;.9;.1" dur="2.0s" begin="0.1s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Center ripple rings -->
+  <circle class="beam" cx="340" cy="200" r="30.0" stroke-width="4.5">
+    <animate attributeName="r"       values="10;30;10" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values=".8;0;.8"  dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle class="beam" cx="340" cy="200" r="25.0" stroke-width="3.0">
+    <animate attributeName="r"       values="10;30;10" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values=".45;0;.45" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Center pip -->
+  <circle class="pip1" cx="340" cy="200" r="13.75"/>
+  <circle class="pip2" cx="340" cy="200" r="6.25"/>
+</svg>
