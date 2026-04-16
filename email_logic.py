@@ -4,6 +4,10 @@ import subprocess
 import re
 import json
 import os
+import shutil
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
 from datetime import datetime
 
 
@@ -51,9 +55,59 @@ def extract_employee_names(output: str) -> list:
     return employees
 
 
+def fallback_scan(domain: str) -> dict:
+    """Built-in fallback scanner using requests and BeautifulSoup."""
+    emails = []
+    base_url = f"https://{domain}"
+    
+    # Common pages to check
+    paths = ["", "/about", "/contact", "/team", "/about-us", "/contact-us"]
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+    }
+
+    try:
+        session = requests.Session()
+        for path in paths:
+            url = urljoin(base_url, path)
+            try:
+                response = session.get(url, headers=headers, timeout=10)
+                if response.status_code == 200:
+                    found_emails = extract_emails(response.text)
+                    emails.extend(found_emails)
+            except Exception:
+                continue
+    except Exception as e:
+        print(f"Fallback scan failed: {str(e)}")
+
+    # De-duplicate
+    emails = sorted(list(set(emails)))
+    
+    # Process results into the standard format
+    usernames = extract_usernames(emails, domain)
+    
+    return {
+        "domain": domain,
+        "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "emails": emails,
+        "usernames": usernames,
+        "employees": [],  # Difficulty to extract reliably without complex parsing
+        "total_emails": len(emails),
+        "total_usernames": len(usernames),
+        "total_employees": 0,
+        "method": "Built-in Fallback Scraper"
+    }
+
+
 def run_harvester(domain: str, sources: list = None, limit: int = 500) -> dict:
     if sources is None:
-        sources = ["baidu", "bevigil", "brave", "certspotter", "crtsh", "duckduckgo", "hackertarget", "otx", "subdomaincenter", "threatcrowd", "yahoo"]
+        sources = ['baidu', 'crtsh', 'duckduckgo', 'yahoo']
+    
+    # Check if theHarvester command exists
+    if not shutil.which("theHarvester"):
+        print(f"\n [!] 'theHarvester' not found. Using built-in fallback scraper for {domain}...")
+        return fallback_scan(domain)
 
     all_emails = []
     employees = []
@@ -71,6 +125,19 @@ def run_harvester(domain: str, sources: list = None, limit: int = 500) -> dict:
     ]
 
     try:
+        # Check if theHarvester is available in PATH or currently installed
+        try:
+            subprocess.run(["theHarvester", "--help"], capture_output=True, timeout=5)
+        except (FileNotFoundError, subprocess.SubprocessError):
+            # Try common variations or just fail gracefully with a descriptive error
+            return {
+                "domain": domain,
+                "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "error": "theHarvester tool not found in system PATH. Please ensure it is installed and available as 'theHarvester' command.",
+                "emails": [], "usernames": [], "employees": [],
+                "total_emails": 0, "total_usernames": 0, "total_employees": 0
+            }
+
         # Increase timeout as we are running all sources at once
         result = subprocess.run(
             cmd,
@@ -82,6 +149,16 @@ def run_harvester(domain: str, sources: list = None, limit: int = 500) -> dict:
         stderr_output = result.stderr
         raw_output_combined = stdout_output + stderr_output
         
+        # Check if it actually ran successfully
+        if result.returncode != 0 and not stdout_output:
+             return {
+                "domain": domain,
+                "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "error": f"theHarvester returned an error: {stderr_output[:200]}",
+                "emails": [], "usernames": [], "employees": [],
+                "total_emails": 0, "total_usernames": 0, "total_employees": 0
+            }
+
         # Priority 1: Parse JSON file if it was created
         if os.path.exists(json_file):
             try:
@@ -98,7 +175,11 @@ def run_harvester(domain: str, sources: list = None, limit: int = 500) -> dict:
                                 "name": person.get('name', 'Unknown'),
                                 "title": person.get('job_title', 'N/A')
                             })
-            except Exception:
+            except json.JSONDecodeError:
+                # If file exists but is not valid JSON, we still have regex fallbacks
+                pass
+            except Exception as e:
+                # Log other file errors if needed
                 pass
             finally:
                 # Clean up temp file
@@ -114,9 +195,21 @@ def run_harvester(domain: str, sources: list = None, limit: int = 500) -> dict:
         all_emails.extend(regex_emails)
 
     except subprocess.TimeoutExpired:
-        pass
-    except Exception:
-        pass
+        return {
+            "domain": domain,
+            "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "error": "theHarvester scan timed out after 300 seconds.",
+            "emails": [], "usernames": [], "employees": [],
+            "total_emails": 0, "total_usernames": 0, "total_employees": 0
+        }
+    except Exception as e:
+        return {
+            "domain": domain,
+            "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "error": f"An unexpected error occurred: {str(e)}",
+            "emails": [], "usernames": [], "employees": [],
+            "total_emails": 0, "total_usernames": 0, "total_employees": 0
+        }
 
     all_emails = sorted(set(all_emails))
     
@@ -147,22 +240,32 @@ def run_email_user_scan(target: str) -> dict:
 
     results = run_harvester(domain)
 
-    return {
-        "user_info": {
-            "emails": results.get("emails", []),
-            "usernames": [u["username"] for u in results.get("usernames", [])],
-            "employees": results.get("employees", []),
-            "total_emails": results.get("total_emails", 0),
-            "total_usernames": results.get("total_usernames", 0),
-            "total_employees": results.get("total_employees", 0),
-            "scan_time": results.get("scan_time", ""),
-            "domain": results.get("domain", domain)
-        }
+    user_info = {
+        "emails": results.get("emails", []),
+        "usernames": [u["username"] for u in results.get("usernames", [])],
+        "employees": results.get("employees", []),
+        "total_emails": results.get("total_emails", 0),
+        "total_usernames": results.get("total_usernames", 0),
+        "total_employees": results.get("total_employees", 0),
+        "scan_time": results.get("scan_time", ""),
+        "domain": results.get("domain", domain)
     }
+
+    output = {
+        "user_info": user_info
+    }
+
+    if "error" in results:
+        output["error"] = results["error"]
+
+    return output
 
 
 def display_results(results: dict):
-    print(f"\n EMAIL ADDRESSES ({results['total_emails']} found)")
+    if "error" in results:
+        print(f"\n [!] ERROR: {results['error']}")
+    
+    print(f"\n EMAIL ADDRESSES ({results.get('total_emails', 0)} found)")
     print("-" * 40)
     if results['emails']:
         for email in results['emails']:

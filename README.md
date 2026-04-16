@@ -59,7 +59,7 @@ Before running the project, you must install the required Python libraries. You 
 
 Run this command in your terminal:
 ```bash
-pip install fastapi uvicorn pydantic jinja2 python-multipart starlette requests beautifulsoup4 python-nmap nvdlib dnspython ipwhois python-Wappalyzer setuptools==70.0.0
+pip install fastapi uvicorn pydantic jinja2 python-multipart starlette requests beautifulsoup4 python-nmap nvdlib dnspython ipwhois python-Wappalyzer setuptools==70.0.0 itsdangerous 
 ```
 
 ### OS-Level Dependencies
