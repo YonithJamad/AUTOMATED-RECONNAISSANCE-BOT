@@ -1,6 +1,7 @@
 import os
 import secrets
 import sys
+import hashlib
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -50,12 +51,8 @@ def init_db():
             password TEXT NOT NULL
         )
     ''')
-    # Insert a default user if empty
-    cur.execute("SELECT COUNT(*) FROM user_details")
-    if cur.fetchone()[0] == 0:
-        cur.execute("INSERT INTO user_details (username, password) VALUES (?, ?)", ("admin", "admin123"))
-        cur.execute("INSERT INTO user_details (username, password) VALUES (?, ?)", ("yonith.jamad", "yonith"))
-        cur.execute("INSERT INTO user_details (username, password) VALUES (?, ?)", ("user", "user123"))
+    # The database structure is created, but no default users are inserted.
+    # Use the `add_user.py` script to add users manually.
     conn.commit()
     conn.close()
 
@@ -71,8 +68,6 @@ def get_db_connection():
     except Exception as e:
         print(f"Error connecting to database: {e}")
         return None
-
-
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -91,7 +86,8 @@ async def login_post(request: Request, username: str = Form(...), password: str 
     conn = get_db_connection()
     if conn:
         cur = conn.cursor()
-        cur.execute("SELECT * FROM user_details WHERE username = ? AND password = ?", (username, password))
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        cur.execute("SELECT * FROM user_details WHERE username = ? AND password = ?", (username, hashed_password))
         user = cur.fetchone()
         cur.close()
         conn.close()

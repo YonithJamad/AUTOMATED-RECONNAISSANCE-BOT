@@ -42,14 +42,21 @@ You should **NOT** run `main.py` directly to start the web server.
 
 ---
 
-## 2. Default User Credentials
+## 2. Managing User Credentials
 
-To access the dashboard, you can use the following user IDs and passwords stored in the local database (`login_app/users.db`):
+For security purposes, there are no default or hardcoded credentials. Passwords are securely hashed using the **SHA-256 algorithm**. To access the dashboard, you must create a user in your local database (`login_app/users.db`).
 
-| Username | Password |
-| :--- | :--- |
-| `admin` | `admin123` |
-| `user` | `user123` |
+We have provided a utility script to securely add users via the terminal.
+
+### Adding a new user
+1. Navigate to the `login_app` directory.
+2. Run the `add_user.py` script:
+   ```bash
+   python add_user.py
+   ```
+3. You will be prompted to securely type a new username and password.
+
+*(Alternatively, you can provide the username in line: `python add_user.py -u myusername`)*
 
 ---
 

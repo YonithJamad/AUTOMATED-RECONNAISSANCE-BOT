@@ -29,7 +29,7 @@ The ecosystem is strongly modularized. The architecture is defined by the follow
   - `webanalysis_logic.py`: Responsible for initializing and parsing `nikto-master/program/nikto.pl` outputs.
   - `email_logic.py` & `search_logic.py`: Isolates Google Dork generation and deep email scraping utilities.
 - **Data Persistence:**
-  - `login_app/users.db`: An SQLite 3 database enforcing access control (Standard logins include `admin` / `admin123` and `user` / `user123`).
+  - `login_app/users.db`: An SQLite 3 database enforcing access control. Users and their SHA-256 hashed passwords are uniquely generated via the `login_app/add_user.py` script.
 
 ### 3.3 Output Files
 Data aggregation occurs consistently without manual intervention:
@@ -85,9 +85,11 @@ Bootstrapping the environment correctly is the most critical operational step. D
 4. Watch the console. Successful instantiation is indicated when the terminal returns: 
    `[*] Starting Login Application on Port 8000...` and Uvicorn log statements.
 5. Open an internet browser and navigate to: **http://127.0.0.1:8000**
-6. Authenticate utilizing the internal database credentials to access the central dashboard:
-   - Default Administrator: Username: `admin` | Password: `admin123`
-   - Default Restricted User: Username: `user` | Password: `user123`
+6. Authenticate utilizing the internal database credentials to access the central dashboard. **Note: As there are no default or hardcoded credentials, you must formulate your first user profile before attempting login:**
+   - Open a secondary terminal and navigate to the `login_app/` directory.
+   - Execute: `python add_user.py`
+   - Follow the interactive prompts to securely convert your preferred Username and Password into a SHA-256 hash and inject it into the SQLite database.
+   - Utilize these newly minted credentials to successfully log into the web interface.
 
 ## 7. Monitoring the Run
 Once target assessments are queued from the dashboard, backend operational awareness is critical:
