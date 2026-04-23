@@ -78,7 +78,27 @@ class AmassPythonClone:
                 self.historical_domains.add(sub)
 
     def display_results(self):
-        pass
+        print("\n--- Subdomain Scan Results ---")
+        if self.wildcard_detected:
+            print("[!] WILDCARD DNS: Detected")
+        else:
+            print("[-] WILDCARD DNS: Not Detected")
+
+        if self.takeover_candidates:
+            print("\n[!] TAKEOVER CANDIDATES FOUND:")
+            for sub, details in self.takeover_candidates.items():
+                print(f"    - {sub}: {details}")
+        else:
+            print("\n[-] TAKEOVER CANDIDATE: None Found")
+
+        print(f"\n[+] Active Subdomains ({len(self.active_subdomains)}):")
+        for sub, ip in self.active_subdomains.items():
+            print(f"    - {sub} ({ip})")
+
+        print(f"\n[+] Historical/Inactive Subdomains ({len(self.historical_domains)}):")
+        for sub in self.historical_domains:
+            print(f"    - {sub}")
+        print("------------------------------\n")
 
     def get_results(self):
         return {
