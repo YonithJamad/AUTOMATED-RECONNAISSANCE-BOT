@@ -170,7 +170,7 @@ def run_network_scan(target):
     nm = nmap.PortScanner()
     try:
         # Step 1: Blazing fast port discovery over all 65k ports without versioning or scripts
-        discovery_args = "-p- -sT -Pn -T4 --min-rate 3000 --max-retries 1 --max-rtt-timeout 800ms -n"
+        discovery_args = "-p- -sT -Pn -T5 --min-rate 5000 --max-retries 1 --max-rtt-timeout 500ms --initial-rtt-timeout 200ms -n"
         nm.scan(target, arguments=discovery_args)
         
         host = target
