@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -9,6 +9,23 @@ import platform
 import os
 import json
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Strict allowlist: hostname, IPv4, or CIDR — blocks all shell metacharacters
+VALID_TARGET_RE = re.compile(
+    r'^(?:'
+    r'(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}'  # hostname
+    r'|(?:\d{1,3}\.){3}\d{1,3}'            # IPv4
+    r'|(?:\d{1,3}\.){3}\d{1,3}/\d{1,2}'   # CIDR
+    r')$'
+)
+
+def require_login(request: Request):
+    """FastAPI dependency — rejects unauthenticated requests with HTTP 401."""
+    if not request.session.get("user"):
+        raise HTTPException(status_code=401, detail="Unauthorized")
 import network_logic
 import subdomain_logic
 import email_logic
@@ -23,23 +40,28 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 SCAN_DATA_DIR = os.path.join(BASE_DIR, "scan_data")
 
+def _reverse_dns(ip: str, timeout: float = 3.0):
+    """Thread-safe reverse DNS — avoids mutating the global socket timeout."""
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError as _TE
+    with ThreadPoolExecutor(max_workers=1) as ex:
+        fut = ex.submit(socket.gethostbyaddr, ip)
+        try:
+            return fut.result(timeout=timeout)[0]
+        except (_TE, OSError):
+            return None
+
 def normalize_target(target, target_type="website"):
     if target_type == "website":
         # Remove schema and trailing paths
         target = target.replace("https://", "").replace("http://", "")
         if not re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$", target):
             target = target.split("/")[0]
-    
+
     # IP RESOLUTION: If it's a bare IP (not CIDR), try to resolve it to a domain
     if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", target):
-        try:
-            socket.setdefaulttimeout(3)
-            resolved = socket.gethostbyaddr(target)[0]
-            socket.setdefaulttimeout(None)
+        resolved = _reverse_dns(target)
+        if resolved:
             return resolved
-        except:
-            socket.setdefaulttimeout(None)
-            pass
     return target
 
 def get_canonical_type(scan_type):
@@ -83,29 +105,29 @@ async def serve_dashboard(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @router.get("/ping")
-async def check_ping_endpoint(target: str):
+async def check_ping_endpoint(target: str, _=Depends(require_login)):
+    if not VALID_TARGET_RE.match(target):
+        return {"error": "Invalid target"}
     # Resolve IP if needed
     if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", target):
-        try:
-            socket.setdefaulttimeout(3)
-            target = socket.gethostbyaddr(target)[0]
-            socket.setdefaulttimeout(None)
-        except:
-            socket.setdefaulttimeout(None)
-            pass
-    
+        resolved = _reverse_dns(target)
+        if resolved:
+            target = resolved
+
     is_alive = ping_host(target)
     return {"alive": is_alive, "target": target}
 
 @router.get("/check_cache")
-async def check_cache_endpoint(target: str, type: str):
+async def check_cache_endpoint(target: str, type: str, _=Depends(require_login)):
     scan_type = type.lower()
     target_clean = normalize_target(target)
     cached_data = get_cached_scan_data(target_clean, scan_type)
     return {"exists": cached_data is not None}
 
 @router.get("/scan")
-async def master_scan(target: str, type: str, target_type: str = "website"):
+async def master_scan(target: str, type: str, target_type: str = "website", _=Depends(require_login)):
+    if not VALID_TARGET_RE.match(target.replace("https://", "").replace("http://", "").split("/")[0]):
+        return {"error": "Invalid target"}
     target = normalize_target(target, target_type)
     scan_type = type.lower()
     
@@ -175,7 +197,7 @@ async def master_scan(target: str, type: str, target_type: str = "website"):
                     print(f"[-] No cache found. Executing {sub_scan_type} scan...")
                     results.update(run_func(target))
         else:
-            return {"error": f"Invalid Scan Type: {type}"}
+            return {"error": "Invalid scan type provided."}
     except Exception as e:
         return {"error": f"Scan failed due to an internal error: {str(e)}"}
 
@@ -220,7 +242,7 @@ def save_scan_data(target, scan_type, results):
             json.dump(data_to_save, f, indent=4)
         cleanup_old_scans()
     except Exception as e:
-        pass
+        logger.warning("save_scan_data failed for %s/%s: %s", target, scan_type, e)
 
 
 def get_cached_scan_data(target, scan_type):
@@ -246,7 +268,7 @@ def get_cached_scan_data(target, scan_type):
             else:
                 os.remove(filepath)
     except Exception as e:
-        pass
+        logger.warning("get_cached_scan_data failed for %s/%s: %s", target, scan_type, e)
     return None
 
 
@@ -263,7 +285,7 @@ def cleanup_old_scans():
                 if (datetime.datetime.now() - file_mod_time).days >= 5:
                     os.remove(filepath)
     except Exception as e:
-        pass
+        logger.warning("cleanup_old_scans error: %s", e)
 
 
 def ping_host(target):

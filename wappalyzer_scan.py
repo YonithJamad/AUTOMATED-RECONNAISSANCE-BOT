@@ -7,7 +7,6 @@ from Wappalyzer import Wappalyzer, WebPage
 
 warnings.filterwarnings("ignore", category=ResourceWarning)
 warnings.filterwarnings("ignore", message=r"Caught 'unbalanced parenthesis", category=UserWarning)
-warnings.filterwarnings("ignore")
 
 def get_banner(url, port=80):
     try:
@@ -49,7 +48,7 @@ def get_wappalyzer_data(target):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
         }
-        response = requests.get(url, headers=headers, timeout=10, verify=False)
+        response = requests.get(url, headers=headers, timeout=10, verify=True)
         
         wappalyzer = Wappalyzer.latest()
         webpage = WebPage(url=url, html=response.text, headers=response.headers)

@@ -8,15 +8,14 @@ import re
 
 def get_ip_info(target):
     try:
-        # Prevent DNS resolve from hanging for minutes
         socket.setdefaulttimeout(3)
         ip = socket.gethostbyname(target)
         try:
             rdns = socket.gethostbyaddr(ip)[0]
-        except:
+        except (socket.herror, socket.gaierror):
             rdns = "N/A"
         return ip, rdns
-    except:
+    except (socket.gaierror, socket.timeout):
         return "0.0.0.0", "N/A"
 
 def check_robots(base):
@@ -25,7 +24,7 @@ def check_robots(base):
         r = requests.get(url, timeout=5)
         if r.status_code == 200:
             return {"found": True, "url": url, "content": r.text[:500]}
-    except:
+    except requests.RequestException:
         pass
     return {"found": False, "url": f"{base}/robots.txt", "content": ""}
 
@@ -37,7 +36,7 @@ def check_sitemap(base):
             root = ET.fromstring(r.text)
             locations = [loc.text for loc in root.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc")[:10]]
             return {"found": True, "entries": locations}
-    except:
+    except (requests.RequestException, ET.ParseError):
         pass
     return {"found": False, "entries": []}
 
@@ -47,10 +46,10 @@ def check_sensitive(base):
     for f in files:
         try:
             url = urljoin(base + "/", f)
-            r = requests.get(url, timeout=2, verify=False)
+            r = requests.get(url, timeout=2, verify=True)
             if r.status_code == 200:
                 found.append(url)
-        except:
+        except requests.RequestException:
             continue
     return found
 

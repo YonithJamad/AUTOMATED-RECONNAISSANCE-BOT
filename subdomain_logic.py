@@ -23,15 +23,17 @@ class AmassPythonClone:
             self.wildcard_detected = False
 
     def passive_discovery(self):
-        url = f"https://crt.sh/?q=%25.{self.domain}&output=json"
-        
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
-        
+
+        crtsh_ok = False
+
+        # Primary source: crt.sh
         try:
+            url = f"https://crt.sh/?q=%25.{self.domain}&output=json"
             with requests.Session() as session:
-                retries = requests.adapters.Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504])
+                retries = requests.adapters.Retry(total=2, backoff_factor=1, status_forcelist=[503, 504])
                 session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retries))
                 response = session.get(url, headers=headers)
                 if response.status_code == 200:
@@ -42,12 +44,24 @@ class AmassPythonClone:
                             for sub in name.split('\n'):
                                 if not sub.startswith('*.'):
                                     self.ssl_san_entries.add(sub)
+                        crtsh_ok = True
                     except ValueError:
                         pass
-                else:
-                    pass
-        except Exception as e:
+        except Exception:
             pass
+
+        # Fallback source: HackerTarget (used when crt.sh is down / returning 5xx)
+        if not crtsh_ok:
+            try:
+                ht_url = f"https://api.hackertarget.com/hostsearch/?q={self.domain}"
+                resp = requests.get(ht_url, headers=headers)
+                if resp.status_code == 200 and "error" not in resp.text.lower()[:30]:
+                    for line in resp.text.splitlines():
+                        parts = line.split(",")
+                        if parts and parts[0].endswith(f".{self.domain}"):
+                            self.ssl_san_entries.add(parts[0].strip())
+            except Exception:
+                pass
 
     def check_takeover(self, subdomain):
         takeover_signatures = {

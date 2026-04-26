@@ -2,7 +2,7 @@
 
 import whois_scanner
 import geoiplookup
-import theharvester
+import hosting_detector as theharvester
 import shodan_tool
 
 def run_initial_scan(target):

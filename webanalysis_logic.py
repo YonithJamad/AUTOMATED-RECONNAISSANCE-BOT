@@ -2,6 +2,7 @@
 
 import subprocess
 import re
+import html as _html
 from urllib.parse import urlparse
 
 # ================= CONFIG =================
@@ -116,14 +117,16 @@ def run_webanalysis_scan(raw_target):
                 for match in parsed_data[key][:50]:
 
                     item_text = " | ".join(match) if isinstance(match, tuple) else match
+                    # HTML-escape raw Nikto output to prevent XSS via crafted server responses
+                    safe_text = _html.escape(item_text)
 
                     val_list.append(
-                        f'<div class="mb-2 pb-1 border-bottom border-secondary border-opacity-25">{item_text}</div>'
+                        f'<div class="mb-2 pb-1 border-bottom border-secondary border-opacity-25">{safe_text}</div>'
                     )
 
                 if len(parsed_data[key]) > 50:
                     val_list.append(
-                        f'<div class="text-muted fst-italic">...and {len(parsed_data[key]) - 50} more</div>'
+                        f'<div class="text-muted fst-italic">...and {_html.escape(str(len(parsed_data[key]) - 50))} more</div>'
                     )
 
                 val = "".join(val_list)

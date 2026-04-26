@@ -90,7 +90,7 @@ def get_ssl_details(host_data):
 
 def get_cvss_details(cve_id):
     try:
-        time.sleep(0.1) 
+        time.sleep(0.1)
         r = nvdlib.searchCVE(cveId=cve_id)
         if r:
             cve = r[0]
@@ -102,10 +102,9 @@ def get_cvss_details(cve_id):
                     score = cve.metrics.cvssMetricV30[0].cvssData.baseScore
                 elif hasattr(cve.metrics, 'cvssMetricV2'):
                     score = cve.metrics.cvssMetricV2[0].cvssData.baseScore
-            
             if score is not None:
                 return score
-    except Exception as e:
+    except Exception:
         pass
     return None
 
@@ -122,9 +121,6 @@ def get_severity_info(score):
     elif 9.0 <= s <= 10.0:
         return "Critical", "Red", "#F44336"
     return "Unknown", "Grey", "#9E9E9E"
-
-    results.sort(key=lambda x: x['score'], reverse=True)
-    return results
 
 def get_single_cve_detail(cve_id, nmap_score):
     nvd_score = get_cvss_details(cve_id)
@@ -200,7 +196,8 @@ def run_network_scan(target):
             }
             
         # Step 2: Deep scan ONLY on the discovered open ports
-        port_list = ",".join(open_ports)
+        # Cast to int explicitly to prevent any argument injection via port values
+        port_list = ",".join(str(int(p)) for p in open_ports)
         deep_scan_args = f"-p {port_list} -sT -sV -Pn --script vulners,ssl-cert -T4 --version-intensity 5 -n"
         nm.scan(target, arguments=deep_scan_args)
 

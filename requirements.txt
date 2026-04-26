@@ -16,4 +16,4 @@ itsdangerous
 email-validator
 setuptools==70.0.0
 fpdf2
-itsdangerous 
+bcrypt

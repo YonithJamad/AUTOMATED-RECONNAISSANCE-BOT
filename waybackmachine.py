@@ -17,7 +17,7 @@ SENSITIVE_REGEX = re.compile(r"(?<![a-zA-Z0-9])(admin|login|portal|config|env|se
 def get_wayback_data(domain):
     clean_domain = domain.replace("http://", "").replace("https://", "").replace("www.", "").split('/')[0]
     
-    cdx_url = f"http://web.archive.org/cdx/search/cdx?url=*.{clean_domain}/*&output=text&fl=original&collapse=urlkey"
+    cdx_url = f"https://web.archive.org/cdx/search/cdx?url=*.{clean_domain}/*&output=text&fl=original&collapse=urlkey"
 
     session = requests.Session()
     retry_strategy = Retry(
@@ -30,7 +30,7 @@ def get_wayback_data(domain):
     session.mount("https://", HTTPAdapter(max_retries=retry_strategy))
 
     try:
-        response = session.get(cdx_url, timeout=60, verify=False)
+        response = session.get(cdx_url, timeout=60, verify=True)
         response.raise_for_status()
         
         all_urls = response.text.splitlines()
