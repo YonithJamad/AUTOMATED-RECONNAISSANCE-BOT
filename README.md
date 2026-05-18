@@ -32,13 +32,28 @@ You should **NOT** run `main.py` directly to start the web server.
 ### Execution Steps
 1. Open your terminal or command prompt.
 2. Navigate to the root of the project folder.
-3. Run the following command:
+3. **Create and activate a virtual environment:**
+
+   **For Windows:**
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\activate
+   ```
+
+   **For Linux / macOS:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+4. **Install Dependencies** (See Section 3 below).
+5. Run the following command to start the application:
    ```bash
    python login_app/app.py
    ```
-4. The terminal will display `[*] Starting Login Application on Port 8000...` and start the Uvicorn server.
-5. Open your web browser and go to: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
-6. You will be greeted by the Login Page.
+6. The terminal will display `[*] Starting Login Application on Port 8000...` and start the Uvicorn server.
+7. Open your web browser and go to: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+8. You will be greeted by the Login Page.
 
 ---
 
